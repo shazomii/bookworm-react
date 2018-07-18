@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Button } from "semantic-ui-react";
+import { Form, Button, Message } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import Validator from "validator";
 import InlineError from "../messages/InlineError";
@@ -23,7 +23,12 @@ class LoginForm extends React.Component {
     const errors = this.validate(this.state.data);
     this.setState({ errors });
     if (Object.keys(errors).length === 0) {
-      this.props.submit(this.state.data);
+      this.setState({ loading: true });
+      this.props
+        .submit(this.state.data)
+        .catch(err =>
+          this.setState({ errors: err.response.data.errors, loading: false })
+        );
     }
   };
 
@@ -39,6 +44,12 @@ class LoginForm extends React.Component {
 
     return (
       <Form onSubmit={this.onSubmit}>
+        {errors.global && (
+          <Message negative>
+            <Message.Header>Something went wrong!</Message.Header>
+            <p>{errors.global}</p>
+          </Message>
+        )}
         <Form.Field error={!!errors.email}>
           <label htmlFor="email">Email</label>
           <input
